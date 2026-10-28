@@ -1,0 +1,14 @@
+# Authorized targets only. 
+
+targets:
+  - name: localhost
+    host: 127.0.0.1
+    authorized: true
+    notes: "Self-scan for tool validation only"
+
+  # Example of a properly authorized target (do not uncomment
+  # until you have written authorization):
+  # - name: county-office-test
+  #   host: 192.168.1.0/24
+  #   authorized: true
+  #   notes: "Written authorization on file: <date>, <signatory>"

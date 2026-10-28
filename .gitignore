@@ -1,0 +1,15 @@
+# Scan outputs - may contain sensitive target data
+output/
+*.nmap
+*.xml
+
+# Python
+__pycache__/
+*.pyc
+env/
+.venv/
+
+# Local config with real targets
+config/targets.local.yaml
+AGENTS.md
+mcp.json
