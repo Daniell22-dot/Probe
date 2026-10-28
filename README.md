@@ -1,4 +1,4 @@
-# DeKUT Basic Exposure Scanner
+# Basic Exposure Scanner
 
 A lightweight tool for Kenyan SMEs and public sector units that:
 1. Scans for basic exposed services (RDP, SMB, outdated Office/Windows)
