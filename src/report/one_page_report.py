@@ -1,17 +1,29 @@
-def generate_report(scan_findings, compliance_results):
+def generate_report(scan_findings, compliance_results, target=None, generated_at=None):
     """Generate a one-page risk report in non-technical language.
 
     Args:
         scan_findings: List of dicts from port_scan/version_check
-        compliance_results: Dict from ODPCChecklist
+        compliance_results: ODPCChecklist instance
+        target: Optional authorized target dict with name and host
+        generated_at: Optional timestamp string
 
     Returns:
         Markdown-formatted report string
     """
+    if isinstance(target, dict):
+        target_name = target.get("name") or target.get("host") or "Authorized target"
+        target_host = target.get("host")
+    else:
+        target_name = target or "Authorized target"
+        target_host = None
+
+    target_label = f"{target_name} ({target_host})" if target_host else target_name
+    generated = generated_at or "automated"
+
     lines = []
     lines.append("# Basic Exposure & Compliance Risk Report")
     lines.append("")
-    lines.append("**Target:** Automated scan | **Generated:** automated")
+    lines.append(f"**Target:** {target_label} | **Generated:** {generated}")
     lines.append("")
 
     # Exposure section
@@ -44,6 +56,8 @@ def generate_report(scan_findings, compliance_results):
         lines.append("- Complete: DPO designation and registration pending")
         if scan_findings:
             lines.append("- Evaluate and patch exposed services")
+    elif overall == "n/a":
+        lines.append("- Compliance checks: not applicable to this validation target")
     else:
         lines.append("- Continue monitoring: All basic controls in place")
 

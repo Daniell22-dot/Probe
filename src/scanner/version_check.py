@@ -1,7 +1,7 @@
 KNOWN_CVES = {
     "CVE-2017-0199": {
         "name": "EternalBlue",
-        "affected_service": "smb",
+        "affected_service": "microsoft-ds",
         "description": "SMBv1 remote code execution vulnerability",
         "kenyan_relevance": "Documented exploitation in Kenya CVE patterns",
         "min_version": "Windows Vista/Server 2008 and earlier",

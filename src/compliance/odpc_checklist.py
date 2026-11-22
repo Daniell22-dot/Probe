@@ -1,11 +1,27 @@
-ODPC_STATUS_CHOICES = {"red", "amber", "green"}
+ODPC_STATUS_CHOICES = {"red", "amber", "green", "n/a"}
+ODPC_CHECK_NAMES = {
+    "registration",
+    "dpo_designation",
+    "dpo_contact_published",
+}
+
 
 class ODPCChecklist:
     """Check Data Protection Act compliance status."""
 
-    def __init__(self, target_host):
+    def __init__(self, target_host, statuses=None):
         self.target_host = target_host
+        self.statuses = dict(statuses or {})
+        invalid_names = set(self.statuses) - ODPC_CHECK_NAMES
+        if invalid_names:
+            raise ValueError(f"Unknown compliance check(s): {', '.join(sorted(invalid_names))}")
+        invalid_statuses = set(self.statuses.values()) - ODPC_STATUS_CHOICES
+        if invalid_statuses:
+            raise ValueError(f"Invalid compliance status: {', '.join(sorted(invalid_statuses))}")
         self.results = {}
+
+    def _status(self, name):
+        return self.statuses.get(name, "amber")
 
     def check_registration(self):
         """Check if organization is registered with ODPC.
@@ -13,9 +29,7 @@ class ODPCChecklist:
         Returns:
             "red" if not registered, "amber" if pending, "green" if registered
         """
-        # For automated scanning: check ODPC public register
-        # For manual mode: returns amber as placeholder
-        self.results["registration"] = "amber"
+        self.results["registration"] = self._status("registration")
         return self.results["registration"]
 
     def check_dpo_designation(self):
@@ -24,7 +38,7 @@ class ODPCChecklist:
         Returns:
             "red" if no DPO, "amber" if shared/DPO in process, "green" if designated
         """
-        self.results["dpo_designation"] = "amber"
+        self.results["dpo_designation"] = self._status("dpo_designation")
         return self.results["dpo_designation"]
 
     def check_dpo_contact_published(self):
@@ -33,18 +47,21 @@ class ODPCChecklist:
         Returns:
             "red" if not published, "amber" if partially published, "green" if fully published
         """
-        self.results["dpo_contact_published"] = "amber"
+        self.results["dpo_contact_published"] = self._status("dpo_contact_published")
         return self.results["dpo_contact_published"]
 
     def overall_status(self):
         """Compute overall compliance status.
 
         Returns:
-            "red" if any item is red, "amber" if any item is amber, "green" if all green
+            "red" if any item is red, "amber" if any item is amber,
+            "n/a" if all items are not applicable, otherwise "green"
         """
-        for status in self.results.values():
-            if status == "red":
-                return "red"
-        if "amber" in self.results.values():
+        values = [status for status in self.results.values() if status != "n/a"]
+        if not values:
+            return "n/a"
+        if "red" in values:
+            return "red"
+        if "amber" in values:
             return "amber"
         return "green"
