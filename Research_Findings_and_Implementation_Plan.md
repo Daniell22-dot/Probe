@@ -3,7 +3,7 @@
 **Project:** Probe (Basic Exposure Scanner and Compliance Snapshot Tool)
 **Institution:** Dedan Kimathi University of Technology (DeKUT) — Centre for Data Research and Cyber Security (CeDReCS)
 **Date:** 28 October 2026
-**Current Phase:** Phase 0 (Manual Assessment Preparation)
+**Current Phase:** Phase 4 (Validation)
 
 
 ## 1. Executive Summary
@@ -83,7 +83,7 @@ The tool must never scan an external IP or domain without written authorization 
 
 ## 4. Implementation Plan
 
-### 4.1 Phase 0: Manual Assessment (Current Phase)
+### 4.1 Phase 0: Manual Assessment (Complete)
 
 **Objective:** Manually assess one real target using existing open-source tools, document findings, and use that document as the requirements specification for the scanner.
 
@@ -131,8 +131,10 @@ The tool must never scan an external IP or domain without written authorization 
 - Report readability (can a non-technical reader state the top three actions after reading?).
 - False-positive rate (were any findings incorrect?).
 
+**Result (2026-11-25):** localhost validation found one exposure (SMB on 445/tcp), no compliance gaps for the N/A validation target, no false positives from closed ports, and a report readable by a non-technical decision-maker.
 
 ## 5. Reference Links for Phase 0 Preparation
+
 
 The following links should be visited during free time before starting Phase 0. They provide the primary evidence base for the project's justification.
 

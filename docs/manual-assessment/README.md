@@ -33,6 +33,24 @@
 
 ## Recommendations
 
-- SMB on port 445 should be evaluated for necessity - CVE-2017-0199 affects SMBv1
+- SMB on port 445 should be evaluated for necessity - SMBv1 should be disabled
 - Ensure SMB version is patched against known CVEs
 - Consider whether SMB exposure is expected for the target environment
+
+## Phase 4: Validation (2026-11-25)
+
+Command: `.\env\Scripts\python.exe src\main.py --target localhost --timeout 60`
+
+| Port | State | Service | Scanner result |
+|------|-------|---------|----------------|
+| 445/tcp | open | microsoft-ds | SMB service exposed |
+| 80/tcp | closed | http | Not reported |
+| 443/tcp | closed | https | Not reported |
+| 3389/tcp | closed | ms-wbt-server | Not reported |
+
+- Findings: 1. No CVE was claimed because Nmap did not identify an SMB version.
+- Compliance: N/A for localhost, as recorded in the manual assessment.
+- False positives: none. Closed ports were not reported as exposure.
+- Test suite: 13 passed.
+- Scan data: `output/scans/` as JSON; report: `output/reports/` as Markdown. Both are ignored by git.
+- Corrected interpretation: CVE-2017-0199 is an Office/WordPad OLE issue. Open SMB is reported as exposure only.

@@ -1,3 +1,9 @@
+def _finding_label(finding):
+    label = f"{finding.get('title', finding.get('service', 'Finding'))} on port {finding.get('port', '?')}"
+    cve = finding.get("cve")
+    return f"{label} ({cve})" if cve else label
+
+
 def generate_report(scan_findings, compliance_results, target=None, generated_at=None):
     """Generate a one-page risk report in non-technical language.
 
@@ -26,17 +32,16 @@ def generate_report(scan_findings, compliance_results, target=None, generated_at
     lines.append(f"**Target:** {target_label} | **Generated:** {generated}")
     lines.append("")
 
-    # Exposure section
     lines.append("## Exposure Summary")
     if scan_findings:
-        lines.append(f"- **{len(scan_findings)} exposed service(s) detected**")
+        lines.append(f"- **{len(scan_findings)} finding(s) detected**")
         for finding in scan_findings:
-            lines.append(f"  - Port {finding['port']}: {finding['service']} ({finding['cve']})")
+            lines.append(f"  - {_finding_label(finding)}")
+        lines.append("- Checks used service banners only; no login or exploitation was attempted.")
     else:
-        lines.append("- No exposed services detected")
+        lines.append("- No exposed services or known version issues detected")
     lines.append("")
 
-    # Compliance section
     lines.append("## Data Protection Act Compliance")
     overall = compliance_results.overall_status()
     lines.append(f"- **Overall status: {overall.upper()}**")
@@ -45,21 +50,25 @@ def generate_report(scan_findings, compliance_results, target=None, generated_at
     lines.append(f"- DPO contact published: {compliance_results.results.get('dpo_contact_published', 'N/A')}")
     lines.append("")
 
-    # Action items
     lines.append("## Recommended Actions")
+    actions = []
+    for finding in scan_findings:
+        action = finding.get("recommendation")
+        if action and action not in actions:
+            actions.append(action)
+
     if overall == "red":
-        lines.append("- Immediate: Register with Office of the Data Protection Commissioner")
-        lines.append("- Immediate: Designate a Data Protection Officer")
-        if scan_findings:
-            lines.append("- Review exposed services and apply relevant security patches")
+        actions.append("Register with the Office of the Data Protection Commissioner")
+        actions.append("Designate a Data Protection Officer")
     elif overall == "amber":
-        lines.append("- Complete: DPO designation and registration pending")
-        if scan_findings:
-            lines.append("- Evaluate and patch exposed services")
+        actions.append("Complete DPO designation and registration")
     elif overall == "n/a":
-        lines.append("- Compliance checks: not applicable to this validation target")
+        actions.append("Compliance checks are not applicable to this validation target")
     else:
-        lines.append("- Continue monitoring: All basic controls in place")
+        actions.append("Continue monitoring basic compliance controls")
+
+    for action in actions:
+        lines.append(f"- {action}")
 
     lines.append("")
     lines.append("*This report is generated automatically for decision-makers. "

@@ -6,7 +6,7 @@ A lightweight tool for Kenyan SMEs and public sector units that:
 3. Produces a one-page risk report for non-technical decision-makers
 
 ## Status
-Phase 0: Manual assessment complete for localhost. Phase 1 scanner core is available for authorized targets only.
+Phase 0 manual assessment and Phase 4 localhost validation are complete. The scanner core is available for authorized targets only.
 
 ## Usage
 From `D:\Probe`, using the local virtual environment:
@@ -17,6 +17,7 @@ From `D:\Probe`, using the local virtual environment:
 
 Only targets marked `authorized: true` in `config/targets.yaml` can be scanned. Results are written to
 `output/scans/` and a plain-language report is written to `output/reports/`. Nmap must be installed on the machine.
+If service detection takes longer than 10 seconds, add `--timeout 60` to the command.
 
 Run the mock-based test suite with:
 

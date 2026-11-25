@@ -1,4 +1,5 @@
 import nmap
+from nmap.nmap import PortScannerTimeout
 
 
 def scan_ports(host, ports, timeout=10, timing=4, arguments=None):
@@ -22,7 +23,10 @@ def scan_ports(host, ports, timeout=10, timing=4, arguments=None):
     scanner = nmap.PortScanner()
     port_str = ",".join(str(p) for p in ports) if isinstance(ports, list) else ports
     arguments = arguments or f"-T{timing} -sV"
-    scanner.scan(host, port_str, arguments=arguments, timeout=timeout)
+    try:
+        scanner.scan(host, port_str, arguments=arguments, timeout=timeout)
+    except PortScannerTimeout as exc:
+        raise TimeoutError(f"Nmap timed out after {timeout} seconds") from exc
     return _parse_scan_output(scanner)
 
 
@@ -36,62 +40,19 @@ def _parse_scan_output(scanner):
         dict with host/port/tcp state info
     """
     result = {}
-    hosts = scanner.all_hosts()
-    if not hosts:
-        return result
 
-    host = hosts[0]
-    host_data = {}
-    tcp_data = scanner[host].get("tcp", {}) if scanner.has_host(host) else {}
+    for host in scanner.all_hosts():
+        host_data = {}
+        tcp_data = scanner[host].get("tcp", {}) if scanner.has_host(host) else {}
 
-    for port, info in tcp_data.items():
-        host_data[port] = {
-            "name": info.get("name", ""),
-            "state": info.get("state", ""),
-            "version": info.get("version", ""),
-        }
+        for port, info in tcp_data.items():
+            host_data[int(port)] = {
+                "name": info.get("name", ""),
+                "state": info.get("state", ""),
+                "version": info.get("version", ""),
+            }
 
-    result[host] = {"tcp": host_data}
+        if host_data:
+            result[host] = {"tcp": host_data}
+
     return result
-
-
-KNOWN_CVES = {
-    "CVE-2017-0199": {
-        "name": "EternalBlue",
-        "affected_service": "microsoft-ds",
-        "description": "SMBv1 remote code execution vulnerability",
-        "kenyan_relevance": "Documented exploitation in Kenya CVE patterns",
-        "min_version": "Windows Vista/Server 2008 and earlier",
-    },
-}
-
-
-def check_versions(scan_result):
-    """Check detected service versions against known CVEs.
-
-    Args:
-        scan_result: dict from scan_ports output
-
-    Returns:
-        List of CVE findings matching detected services
-    """
-    findings = []
-
-    host_data = scan_result.get(list(scan_result.keys())[0], {}) if scan_result else {}
-
-    for port, info in host_data.get("tcp", {}).items():
-        service = info.get("name", "")
-        version = info.get("version", "")
-
-        for cve_id, cve_info in KNOWN_CVES.items():
-            if cve_info["affected_service"] in service.lower():
-                findings.append({
-                    "cve": cve_id,
-                    "service": service,
-                    "port": port,
-                    "version": version,
-                    "description": cve_info["description"],
-                    "kenyan_relevance": cve_info["kenyan_relevance"],
-                })
-
-    return findings
