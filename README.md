@@ -33,6 +33,17 @@ For full build verification on a standard Windows 10 machine:
 
 It checks config authorization, compiles source, runs tests, scans localhost, and validates output and report limits. No Bash is required.
 
+Native PowerShell wrappers provide one-command operation:
+
+```powershell
+.\verify.ps1
+.\probe.ps1 scan --target localhost
+.\probe.ps1 check-config
+.\probe.ps1 check-report
+```
+
+If your organization's execution policy blocks local scripts, use the approved PowerShell policy process.
+
 ## Optional shell workflow (Git Bash/WSL only)
 
 Bash is not required to run Probe. If Git Bash or WSL is installed, these are convenience wrappers around the same Python checks:
@@ -52,6 +63,12 @@ ODPC publishes the register as a single bot-protected page. Open the public regi
 
 ```powershell
 .\env\Scripts\python.exe src\main.py --target <authorized-target> --organization "County Government of Nairobi" --register-file output\odpc-register.csv --timeout 60
+```
+
+PowerShell wrapper equivalent:
+
+```powershell
+.\probe.ps1 odpc --target <authorized-target> --organization "County Government of Nairobi" --register-file output\odpc-register.csv
 ```
 
 Exact active matches are GREEN, possible matches are AMBER, and no active match is RED. An explicit `--compliance-status registration=...` overrides the lookup. DPO designation and published contact remain manual inputs because ODPC does not publish a DPO register. Evidence is saved to `output/scans/` as `*-compliance.json`.
