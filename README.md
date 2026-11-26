@@ -25,22 +25,25 @@ Run the mock-based test suite with:
 .\env\Scripts\python.exe -m pytest
 ```
 
-## Build check
+## Shell workflow
 
 From Git Bash, WSL, or PowerShell with Git Bash installed:
 
 ```bash
-bash build.sh
+./probe.sh verify
+./probe.sh scan --target localhost
+./probe.sh odpc --organization "County Government of Nairobi" --register-file output/odpc-register.csv
+./probe.sh check-report
 ```
 
-It checks Nmap, config authorization, compiles source, runs tests, scans localhost, and verifies output files. Any failure stops the build with a non-zero exit code.
+`build.sh` is the build-only alias for `./probe.sh verify`. Shell owns the guardrails: config authorization, script syntax, compile, tests, localhost scan, and report limits. Python still owns scanning and compliance logic. Any failure stops the build with a non-zero exit code.
 
 ## ODPC registration lookup
 
 ODPC publishes the register as a single bot-protected page. Open the public register in your browser, save it as CSV, HTML, or JSON under `output/` (ignored by git), then run:
 
-```powershell
-.\env\Scripts\python.exe src\main.py --target <authorized-target> --organization "County Government of Nairobi" --register-file output\odpc-register.csv --timeout 60
+```bash
+./probe.sh odpc --target <authorized-target> --organization "County Government of Nairobi" --register-file output/odpc-register.csv
 ```
 
 Exact active matches are GREEN, possible matches are AMBER, and no active match is RED. An explicit `--compliance-status registration=...` overrides the lookup. DPO designation and published contact remain manual inputs because ODPC does not publish a DPO register. Evidence is saved to `output/scans/` as `*-compliance.json`.
