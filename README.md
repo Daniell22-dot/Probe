@@ -25,25 +25,33 @@ Run the mock-based test suite with:
 .\env\Scripts\python.exe -m pytest
 ```
 
-## Shell workflow
+For full build verification on a standard Windows 10 machine:
 
-From Git Bash, WSL, or PowerShell with Git Bash installed:
+```powershell
+.\env\Scripts\python.exe scripts\verify.py
+```
+
+It checks config authorization, compiles source, runs tests, scans localhost, and validates output and report limits. No Bash is required.
+
+## Optional shell workflow (Git Bash/WSL only)
+
+Bash is not required to run Probe. If Git Bash or WSL is installed, these are convenience wrappers around the same Python checks:
 
 ```bash
 ./probe.sh verify
 ./probe.sh scan --target localhost
-./probe.sh odpc --organization "County Government of Nairobi" --register-file output/odpc-register.csv
+./probe.sh check-config
 ./probe.sh check-report
 ```
 
-`build.sh` is the build-only alias for `./probe.sh verify`. Shell owns the guardrails: config authorization, script syntax, compile, tests, localhost scan, and report limits. Python still owns scanning and compliance logic. Any failure stops the build with a non-zero exit code.
+`build.sh` is the build-only alias for `./probe.sh verify`.
 
 ## ODPC registration lookup
 
 ODPC publishes the register as a single bot-protected page. Open the public register in your browser, save it as CSV, HTML, or JSON under `output/` (ignored by git), then run:
 
-```bash
-./probe.sh odpc --target <authorized-target> --organization "County Government of Nairobi" --register-file output/odpc-register.csv
+```powershell
+.\env\Scripts\python.exe src\main.py --target <authorized-target> --organization "County Government of Nairobi" --register-file output\odpc-register.csv --timeout 60
 ```
 
 Exact active matches are GREEN, possible matches are AMBER, and no active match is RED. An explicit `--compliance-status registration=...` overrides the lookup. DPO designation and published contact remain manual inputs because ODPC does not publish a DPO register. Evidence is saved to `output/scans/` as `*-compliance.json`.
