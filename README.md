@@ -25,6 +25,16 @@ Run the mock-based test suite with:
 .\env\Scripts\python.exe -m pytest
 ```
 
+## Build check
+
+From Git Bash, WSL, or PowerShell with Git Bash installed:
+
+```bash
+bash build.sh
+```
+
+It checks Nmap, config authorization, compiles source, runs tests, scans localhost, and verifies output files. Any failure stops the build with a non-zero exit code.
+
 ## ODPC registration lookup
 
 ODPC publishes the register as a single bot-protected page. Open the public register in your browser, save it as CSV, HTML, or JSON under `output/` (ignored by git), then run:
