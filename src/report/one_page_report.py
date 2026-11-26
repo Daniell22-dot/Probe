@@ -48,6 +48,18 @@ def generate_report(scan_findings, compliance_results, target=None, generated_at
     lines.append(f"- Registration: {compliance_results.results.get('registration', 'N/A')}")
     lines.append(f"- DPO designated: {compliance_results.results.get('dpo_designation', 'N/A')}")
     lines.append(f"- DPO contact published: {compliance_results.results.get('dpo_contact_published', 'N/A')}")
+    registration_evidence = getattr(compliance_results, "evidence", {}).get("registration")
+    if registration_evidence:
+        source = registration_evidence.get("source") or "ODPC register"
+        confidence = registration_evidence.get("confidence") or "unknown"
+        lines.append(f"- Registration check: {confidence} match from {source}")
+        if registration_evidence.get("registration_number"):
+            handler_type = registration_evidence.get("handler_type") or "data handler"
+            lines.append(
+                f"- Registration number: {registration_evidence['registration_number']} ({handler_type})"
+            )
+        if registration_evidence.get("note"):
+            lines.append(f"- {registration_evidence['note']}")
     lines.append("")
 
     lines.append("## Recommended Actions")

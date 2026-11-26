@@ -9,9 +9,10 @@ ODPC_CHECK_NAMES = {
 class ODPCChecklist:
     """Check Data Protection Act compliance status."""
 
-    def __init__(self, target_host, statuses=None):
+    def __init__(self, target_host, statuses=None, evidence=None):
         self.target_host = target_host
         self.statuses = dict(statuses or {})
+        self.evidence = dict(evidence or {})
         invalid_names = set(self.statuses) - ODPC_CHECK_NAMES
         if invalid_names:
             raise ValueError(f"Unknown compliance check(s): {', '.join(sorted(invalid_names))}")

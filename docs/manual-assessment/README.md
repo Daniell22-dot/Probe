@@ -54,3 +54,13 @@ Command: `.\env\Scripts\python.exe src\main.py --target localhost --timeout 60`
 - Test suite: 13 passed.
 - Scan data: `output/scans/` as JSON; report: `output/reports/` as Markdown. Both are ignored by git.
 - Corrected interpretation: CVE-2017-0199 is an Office/WordPad OLE issue. Open SMB is reported as exposure only.
+
+## Phase 5: ODPC Registration Lookup (2026-11-26)
+
+Command: `.\env\Scripts\python.exe src\main.py --target localhost --organization "County Government of Nairobi" --register-file output\validation-odpc-register.csv --timeout 60`
+
+- The register snapshot used for validation was synthetic and stored under `output/`, which is ignored by git.
+- Exact active match returned GREEN and recorded the registration number in the report.
+- Possible, missing, and expired cases are covered by tests.
+- DPO status remains a manual input because ODPC does not publish a DPO register.
+- Test suite: 21 passed.

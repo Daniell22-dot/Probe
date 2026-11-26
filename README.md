@@ -6,7 +6,7 @@ A lightweight tool for Kenyan SMEs and public sector units that:
 3. Produces a one-page risk report for non-technical decision-makers
 
 ## Status
-Phase 0 manual assessment and Phase 4 localhost validation are complete. The scanner core is available for authorized targets only.
+Phase 0 manual assessment, Phase 4 localhost validation, and Phase 5 ODPC registration lookup are complete. The scanner core is available for authorized targets only.
 
 ## Usage
 From `D:\Probe`, using the local virtual environment:
@@ -24,6 +24,16 @@ Run the mock-based test suite with:
 ```powershell
 .\env\Scripts\python.exe -m pytest
 ```
+
+## ODPC registration lookup
+
+ODPC publishes the register as a single bot-protected page. Open the public register in your browser, save it as CSV, HTML, or JSON under `output/` (ignored by git), then run:
+
+```powershell
+.\env\Scripts\python.exe src\main.py --target <authorized-target> --organization "County Government of Nairobi" --register-file output\odpc-register.csv --timeout 60
+```
+
+Exact active matches are GREEN, possible matches are AMBER, and no active match is RED. An explicit `--compliance-status registration=...` overrides the lookup. DPO designation and published contact remain manual inputs because ODPC does not publish a DPO register. Evidence is saved to `output/scans/` as `*-compliance.json`.
 
 ## Why this exists
 Kenya's public sector has repeated breaches of basic controls:

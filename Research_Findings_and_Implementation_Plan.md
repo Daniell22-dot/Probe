@@ -3,7 +3,7 @@
 **Project:** Probe (Basic Exposure Scanner and Compliance Snapshot Tool)
 **Institution:** Dedan Kimathi University of Technology (DeKUT) — Centre for Data Research and Cyber Security (CeDReCS)
 **Date:** 28 October 2026
-**Current Phase:** Phase 4 (Validation)
+**Current Phase:** Phase 5 (ODPC Registration Lookup)
 
 
 ## 1. Executive Summary
@@ -133,10 +133,22 @@ The tool must never scan an external IP or domain without written authorization 
 
 **Result (2026-11-25):** localhost validation found one exposure (SMB on 445/tcp), no compliance gaps for the N/A validation target, no false positives from closed ports, and a report readable by a non-technical decision-maker.
 
+### 4.6 Phase 5: ODPC Registration Lookup
+
+**Objective:** Check ODPC registration status from the public register without adding a cloud dependency or scraping a bot-protected site.
+
+**Components:**
+- `src/compliance/odpc_register.py`: Load a CSV, JSON, or HTML snapshot of the public register and match the organization name.
+- Exact active matches return GREEN, possible matches return AMBER, and no active match returns RED.
+- Explicit `--compliance-status registration=...` overrides the lookup; DPO checks remain manual.
+- Evidence is written to `output/scans/` as JSON and summarized in the one-page report.
+
+**Result (2026-11-26):** registration lookup was validated with a local register snapshot; exact, possible, missing, and expired cases are covered by tests.
+
 ## 5. Reference Links for Phase 0 Preparation
 
-
 The following links should be visited during free time before starting Phase 0. They provide the primary evidence base for the project's justification.
+
 
 ### Government Website Incidents
 

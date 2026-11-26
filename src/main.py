@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 import yaml
 
 from src.compliance.odpc_checklist import ODPCChecklist
+from src.compliance.odpc_register import load_register, lookup_registration
 from src.report.one_page_report import generate_report
 from src.scanner.port_scan import scan_ports
 from src.scanner.version_check import check_versions
@@ -107,6 +108,14 @@ def build_parser():
         metavar="KEY=VALUE",
         help="Override a compliance status: registration, dpo_designation, dpo_contact_published",
     )
+    parser.add_argument(
+        "--register-file",
+        help="CSV, JSON, or HTML snapshot of the ODPC public register of data handlers",
+    )
+    parser.add_argument(
+        "--organization",
+        help="Legal name to look up; defaults to the target name and requires --register-file",
+    )
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT), help="Directory for scan and report files")
     return parser
 
@@ -114,22 +123,35 @@ def build_parser():
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.organization and not args.register_file:
+        parser.error("--organization requires --register-file")
 
     try:
         targets = load_targets(args.config)
         target = select_target(targets, args.target)
         ports = parse_ports(args.ports)
         statuses = parse_statuses(args.compliance_status)
+        generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        evidence = {}
+
+        if args.register_file and "registration" not in statuses:
+            rows = load_register(args.register_file, timeout=args.timeout)
+            organization = args.organization or target["name"]
+            registration_evidence = lookup_registration(
+                organization, rows, timeout=args.timeout, checked_at=generated_at
+            )
+            evidence["registration"] = registration_evidence
+            statuses["registration"] = registration_evidence["status"]
+
         if is_loopback(target["host"]):
             default_statuses = {key: "n/a" for key in COMPLIANCE_KEYS}
             default_statuses.update(statuses)
             statuses = default_statuses
 
-        generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         scan = scan_ports(target["host"], ports, timeout=args.timeout, timing=args.timing)
         findings = check_versions(scan)
 
-        checklist = ODPCChecklist(target["host"], statuses=statuses)
+        checklist = ODPCChecklist(target["host"], statuses=statuses, evidence=evidence)
         checklist.check_registration()
         checklist.check_dpo_designation()
         checklist.check_dpo_contact_published()
@@ -148,6 +170,10 @@ def main(argv=None):
         report_path = report_dir / f"{slug}-{stamp}.md"
         scan_path.write_text(json.dumps(scan, indent=2) + "\n", encoding="utf-8")
         report_path.write_text(report + "\n", encoding="utf-8")
+        evidence_path = None
+        if evidence:
+            evidence_path = scan_dir / f"{slug}-{stamp}-compliance.json"
+            evidence_path.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
 
@@ -155,6 +181,8 @@ def main(argv=None):
     print(f"Findings: {len(findings)} | Compliance: {overall}")
     print(f"Scan data: {scan_path}")
     print(f"Report: {report_path}")
+    if evidence_path:
+        print(f"Compliance evidence: {evidence_path}")
     return 0
 
 
